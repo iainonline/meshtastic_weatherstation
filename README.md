@@ -1,28 +1,38 @@
-# Meshtastic Battery Monitor
+# Meshtastic Weather Station
 
-A Python application for Raspberry Pi Zero 2 W that monitors and sends battery percentage from a USB-connected Meshtastic node to a designated target node. Designed for headless operation - perfect for remote battery monitoring.
+A Python application for Raspberry Pi Zero 2 W that monitors and sends battery percentage, temperature, and humidity from a USB-connected Meshtastic node to a designated target node. Includes DHT22 temperature/humidity sensor support. Designed for headless operation - perfect for remote weather monitoring.
 
 ## Features
 
 - 🔋 Automatically sends battery percentage every 60 seconds
+- 🌡️ Reads temperature and humidity from DHT22 sensor
 - 📱 Connects to Meshtastic nodes via USB
 - 🤖 Headless operation - no keyboard/mouse required
 - ⚙️ JSON-based configuration
 - 🔄 Configurable send intervals and target nodes
 - 🚀 Auto-starts on boot with systemd service
+- 📊 Sends data in both Celsius and Fahrenheit
 
 ## Requirements
 
 - Raspberry Pi Zero 2 W (or any Linux system with ARM/x86 architecture)
 - Python 3.7+
 - USB-connected Meshtastic node
+- DHT22 temperature/humidity sensor (optional)
 - Virtual environment (recommended)
 
-## Hardware Compatibility
+## Hardware Setup
 
+### Meshtastic Node
 ✅ **Raspberry Pi Zero 2 W** - Fully tested and optimized
 ✅ **ARM Architecture** - All libraries are ARM-compatible
 ✅ **USB Serial** - Works with any Meshtastic node connected via USB
+
+### DHT22 Sensor Wiring (Default: GPIO4)
+- **VCC (Pin 1)** → 3.3V (Pi Pin 1)
+- **Data (Pin 2)** → GPIO4 (Pi Pin 7) - Configurable in config.json
+- **GND (Pin 4)** → GND (Pi Pin 6)
+- **Note:** A 10kΩ pull-up resistor between VCC and Data is recommended (some modules have this built-in)
 
 ## Installation
 
@@ -50,6 +60,9 @@ source venv/bin/activate
 **IMPORTANT for Raspberry Pi Zero 2 W (USB-only setup):**
 
 ```bash
+# Install system library for DHT22 sensor
+sudo apt install libgpiod2 -y
+
 # Install meshtastic without dependencies (skips slow dbus-fast compilation)
 pip install --no-deps meshtastic==2.3.12
 
@@ -67,15 +80,18 @@ Edit `config.json` to set your target node and preferences:
 {
   "target_node_num": 2658499212,
   "send_interval_seconds": 60,
-  "auto_start_timeout_seconds": 10
+  "auto_start_timeout_seconds": 10,
+  "dht22_enabled": true,
+  "dht22_gpio_pin": 4
 }
-
 ```
 
 **Configuration Parameters:**
 - `target_node_num`: The Meshtastic node number to send messages to (decimal format)
-- `send_interval_seconds`: How often to send battery updates (default: 60)
+- `send_interval_seconds`: How often to send weather updates (default: 60)
 - `auto_start_timeout_seconds`: Not used in headless mode (kept for compatibility)
+- `dht22_enabled`: Enable/disable DHT22 sensor (true/false)
+- `dht22_gpio_pin`: GPIO pin number for DHT22 data line (default: 4 = Physical Pin 7)
 
 **Finding Your Target Node Number:**
 You can find node numbers using the Meshtastic app or by checking your node's web interface.
@@ -93,10 +109,16 @@ python3 battery_monitor.py
 ```
 
 The script will:
-1. Display configuration
-2. Connect to USB Meshtastic node
-3. Start sending battery percentage every 60 seconds
-4. Run continuously until stopped with Ctrl+C
+1. Initialize DHT22 sensor (if enabled)
+2. Display configuration
+3. Connect to USB Meshtastic node
+4. Start sending battery, temperature, and humidity data every 60 seconds
+5. Run continuously until stopped with Ctrl+C
+
+**Example output message:**
+```
+Bat: 95% | Temp: 22.5°C (72.5°F) | Hum: 45.2%
+```
 
 ### Running on Boot (Headless Setup)
 
@@ -156,6 +178,25 @@ sudo usermod -a -G dialout $USER
 ```
 Then log out and log back in (or reboot).
 
+### DHT22 Sensor Issues
+
+**"RuntimeError: A full buffer was not returned"**
+- DHT22 sensors can be temperamental and may fail occasionally
+- The script will retry on next interval
+- Ensure proper wiring and 10kΩ pull-up resistor
+
+**GPIO Permission Issues**
+```bash
+sudo usermod -a -G gpio $USER
+```
+Then reboot.
+
+**Sensor reads "N/A"**
+- Check wiring (VCC to 3.3V, GND to GND, Data to GPIO4)
+- Verify `dht22_enabled: true` in config.json
+- Check correct GPIO pin number in config.json
+- DHT22 needs a few seconds to warm up on first read
+
 ### No Node Found
 - Ensure your Meshtastic device is connected via USB
 - Check with `ls /dev/ttyUSB*` or `ls /dev/ttyACM*`
@@ -171,16 +212,18 @@ Some nodes may not report battery status immediately. The app will send "Battery
 
 ## Dependencies
 
-- **meshtastic** (>=2.2.0) - Python library for Meshtastic communication
+- **meshtastic** (2.3.12) - Python library for Meshtastic communication
 - **pyserial** (>=3.5) - Serial port communication library
+- **adafruit-circuitpython-dht** - DHT22 temperature/humidity sensor library
+- **RPi.GPIO** - Raspberry Pi GPIO control
 
-Both libraries are fully compatible with Raspberry Pi Zero 2 W ARM architecture.
+All libraries are fully compatible with Raspberry Pi Zero 2 W ARM architecture.
 
 ## Project Structure
 
 ```
 SimpleMeshPing/
-├── battery_monitor.py      # Main application
+├── battery_monitor.py      # Main weather station application
 ├── config.json             # Configuration file
 ├── requirements.txt        # Python dependencies
 └── README.md              # This file

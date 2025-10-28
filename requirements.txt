@@ -11,3 +11,7 @@ dotmap
 pexpect
 tabulate
 timeago
+
+# DHT22 Temperature/Humidity Sensor
+adafruit-circuitpython-dht
+RPi.GPIO

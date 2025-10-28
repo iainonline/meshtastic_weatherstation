@@ -1,5 +1,7 @@
 {
   "target_node_num": 2658499212,
   "send_interval_seconds": 60,
-  "auto_start_timeout_seconds": 10
+  "auto_start_timeout_seconds": 10,
+  "dht22_enabled": true,
+  "dht22_gpio_pin": 4
 }
