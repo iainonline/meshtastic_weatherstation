@@ -51,10 +51,7 @@ sudo apt install libgpiod2 -y
 # Install Meshtastic CLI (without heavy dependencies)
 pip install --no-deps meshtastic
 
-# Install pyserial (required by meshtastic CLI)
-pip install pyserial
-
-# Install DHT22 libraries (optional)
+# Install minimal requirements
 pip install -r requirements.txt
 ```
 

@@ -1,6 +1,10 @@
 # Ultra-minimal dependencies for Pi Zero 2 W
 # Uses Meshtastic CLI (installed via pip install meshtastic --no-deps)
 
+# Required by Meshtastic CLI
+pyserial
+requests
+
 # DHT22 Temperature/Humidity Sensor (optional)
 adafruit-circuitpython-dht
 adafruit-blinka
