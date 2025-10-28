@@ -57,20 +57,20 @@ source venv/bin/activate
 
 ### 4. Install Dependencies
 
-**IMPORTANT for Raspberry Pi Zero 2 W (USB-only setup):**
+**IMPORTANT for Raspberry Pi Zero 2 W - Follow this exact order:**
 
 ```bash
 # Install system library for DHT22 sensor
 sudo apt install libgpiod2 -y
 
-# Install meshtastic without dependencies (skips slow dbus-fast compilation)
+# STEP 1: Install meshtastic WITHOUT dependencies (skips 30min dbus-fast compilation!)
 pip install --no-deps meshtastic==2.3.12
 
-# Install only USB-required dependencies (fast!)
+# STEP 2: Install ONLY the required dependencies (fast - under 2 minutes!)
 pip install -r requirements.txt
 ```
 
-**Note:** This installation method skips Bluetooth dependencies (dbus-fast, bleak) which can take 30+ minutes to compile on Pi Zero 2 W. Since this project uses USB connection only, these are not needed.
+**Critical:** Do NOT skip `--no-deps` flag! Installing meshtastic normally will pull in dbus-fast which takes 30+ minutes to compile on Pi Zero 2 W. Since this is USB-only, dbus-fast is not needed.
 
 ## Configuration
 

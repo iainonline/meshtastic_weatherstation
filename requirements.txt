@@ -1,16 +1,15 @@
 # USB-only installation (no Bluetooth dependencies)
-# Install meshtastic without deps to skip slow dbus-fast compilation
-# Use: pip install --no-deps meshtastic==2.3.12
-# Then: pip install -r requirements.txt
+# DO NOT install meshtastic from this file - it will pull in dbus-fast!
+# Follow the installation order in README.md
 
-meshtastic==2.3.12
+# Required for meshtastic USB operation
 pyserial>=3.5
-protobuf
-pypubsub
-dotmap
-pexpect
-tabulate
-timeago
+protobuf>=3.20.0
+pypubsub>=4.0.3
+dotmap>=1.3.30
+pexpect>=4.8.0
+tabulate>=0.9.0
+timeago>=1.0.16
 
 # DHT22 Temperature/Humidity Sensor
 adafruit-circuitpython-dht
