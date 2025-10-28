@@ -1,8 +1,5 @@
-# Minimal dependencies - NO meshtastic library needed!
-# Direct serial communication only
-
-# Serial communication
-pyserial>=3.5
+# Ultra-minimal dependencies for Pi Zero 2 W
+# Uses Meshtastic CLI (installed via pip install meshtastic --no-deps)
 
 # DHT22 Temperature/Humidity Sensor (optional)
 adafruit-circuitpython-dht

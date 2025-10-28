@@ -1,20 +1,23 @@
 # Meshtastic Weather Station
 
-A Python application for Raspberry Pi Zero 2 W that sends temperature and humidity data via Meshtastic. **No meshtastic Python library required** - uses direct serial communication for maximum simplicity and speed.
+Ultra-simple weather station for Raspberry Pi Zero 2 W. Sends temperature and humidity via Meshtastic CLI. **Minimal dependencies, maximum reliability.**
 
 ## Features
 
-- 🌡️ Reads temperature and humidity from DHT22 sensor
-- � Sends data via Meshtastic using AT commands over serial
-- 🚀 **Ultra-fast install** - NO meshtastic library dependencies!
-- 🤖 Headless operation - no keyboard/mouse required
-- ⚙️ JSON-based configuration
-- 🔄 Configurable send intervals
-- 📊 Sends data in Fahrenheit
+- 🌡️ DHT22 temperature and humidity sensor
+- 📡 Uses Meshtastic CLI (simple subprocess calls)
+- ⚡ **Fast install** - No heavy dependencies
+- 🤖 Headless operation
+- 🛡️ **Reliable** - Simple Python code, easy to debug
+- 📊 Sends in Fahrenheit
 
-## Why No Meshtastic Library?
+## Why This Approach?
 
-The official `meshtastic` Python library has heavy dependencies (protobuf, dbus-fast, etc.) that take 30+ minutes to compile on Pi Zero 2 W. This version uses **direct serial AT commands** instead - same functionality, **installs in seconds**!
+Uses `meshtastic` CLI command via subprocess instead of the Python library. Same functionality, way simpler:
+- ✅ No protobuf, pypubsub, packaging complexity
+- ✅ Installs in under 1 minute on Pi Zero 2 W  
+- ✅ Easy to troubleshoot
+- ✅ Minimal dependencies = fewer breaking points
 
 ## Requirements
 
@@ -25,7 +28,7 @@ The official `meshtastic` Python library has heavy dependencies (protobuf, dbus-
 
 ## Installation
 
-### 1. Clone the Repository
+### 1. Clone Repository
 
 ```bash
 git clone https://github.com/iainonline/meshtastic_weatherstation.git
@@ -41,17 +44,21 @@ source venv/bin/activate
 
 ### 3. Install Dependencies
 
-**SUPER SIMPLE - Just 2 packages!**
-
 ```bash
-# Install system library for DHT22
+# System library for DHT22
 sudo apt install libgpiod2 -y
 
-# Install Python dependencies (under 30 seconds!)
+# Install Meshtastic CLI (without heavy dependencies)
+pip install --no-deps meshtastic
+
+# Install pyserial (required by meshtastic CLI)
+pip install pyserial
+
+# Install DHT22 libraries (optional)
 pip install -r requirements.txt
 ```
 
-That's it! No meshtastic library, no protobuf, no dbus-fast compilation!
+**Total install time: ~1 minute on Pi Zero 2 W**
 
 ## Hardware Setup
 
@@ -82,22 +89,17 @@ Edit `config.json`:
 
 ## Usage
 
-### Manual Run
+### Run
 
 ```bash
 source venv/bin/activate
 python3 weather_station.py
 ```
 
-The script will:
-1. Initialize DHT22 sensor (if enabled)
-2. Find and connect to Meshtastic device via USB
-3. Send weather data every 60 seconds
-4. Run continuously until stopped with Ctrl+C
-
-**Example output:**
+**Output:**
 ```
-Temp: 72.5°F | Hum: 45.2%
+[10:30:15] Sending: Temp: 72.5°F | Hum: 45.2%
+✓ Sent
 ```
 
 ### Running on Boot (Headless Setup)
@@ -190,35 +192,50 @@ Some nodes may not report battery status immediately. The app will send "Battery
 - Verify Python path in service file matches your installation
 - Ensure virtual environment has all dependencies installed
 
-### "ModuleNotFoundError" Errors
-If you get import errors, verify you followed the exact installation order:
+### "Meshtastic CLI not found" Error
+
+The script uses the `meshtastic` CLI command. Install it:
+
 ```bash
-# Must install meshtastic FIRST with --no-deps
-pip install --no-deps meshtastic==2.3.12
-# THEN install requirements
-pip install -r requirements.txt
+pip install --no-deps meshtastic
+pip install pyserial
+```
+
+Verify it works:
+```bash
+meshtastic --info
 ```
 
 ## Dependencies
 
-**Minimal - Just 2 packages!**
-- **pyserial** (>=3.5) - USB serial communication
-- **adafruit-circuitpython-dht** - DHT22 sensor (optional)
-- **adafruit-blinka** - GPIO support for CircuitPython
+**Minimal and reliable:**
+- `meshtastic` CLI (installed with `--no-deps` flag)
+- `pyserial` - Serial communication for Meshtastic CLI
+- `adafruit-circuitpython-dht` - DHT22 sensor (optional)
+- `adafruit-blinka` - GPIO support (optional)
 
-**NO meshtastic library required!** Uses direct AT command communication over serial.
+**No heavy dependencies:** No protobuf, no pypubsub, no packaging, no dbus-fast!
 
-**Total install time on Pi Zero 2 W:** ~30 seconds (vs 30+ minutes with meshtastic library)
+**Install time on Pi Zero 2 W:** ~1 minute
 
 ## Project Structure
 
 ```
 meshtastic_weatherstation/
-├── weather_station.py      # Main application (NO meshtastic library!)
-├── config.json             # Configuration file
-├── requirements.txt        # Minimal dependencies (just pyserial + DHT22)
+├── weather_station.py      # Main app (~150 lines, simple & clean)
+├── config.json             # Configuration
+├── requirements.txt        # DHT22 dependencies only
 └── README.md              # This file
 ```
+
+## How It Works
+
+1. Reads temperature/humidity from DHT22 sensor
+2. Formats message: `"Temp: 72.5°F | Hum: 45.2%"`
+3. Calls `meshtastic --sendtext "message"` via subprocess
+4. Repeats every 60 seconds
+
+Simple, reliable, easy to understand!
 
 ## Contributing
 
