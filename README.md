@@ -47,9 +47,18 @@ source venv/bin/activate
 
 ### 4. Install Dependencies
 
+**IMPORTANT for Raspberry Pi Zero 2 W:** Install system packages first to avoid slow compilation:
+
 ```bash
+# Install system dependencies (pre-compiled, fast)
+sudo apt update
+sudo apt install python3-dbus python3-cryptography python3-serial -y
+
+# Then install Python packages
 pip install -r requirements.txt
 ```
+
+**Note:** The `meshtastic` library may take a few minutes to install on Pi Zero 2 W even with system dependencies.
 
 ## Configuration
 
