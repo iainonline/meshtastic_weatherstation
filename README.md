@@ -47,18 +47,17 @@ source venv/bin/activate
 
 ### 4. Install Dependencies
 
-**IMPORTANT for Raspberry Pi Zero 2 W:** Install system packages first to avoid slow compilation:
+**IMPORTANT for Raspberry Pi Zero 2 W (USB-only setup):**
 
 ```bash
-# Install system dependencies (pre-compiled, fast)
-sudo apt update
-sudo apt install python3-dbus python3-cryptography python3-serial -y
+# Install meshtastic without dependencies (skips slow dbus-fast compilation)
+pip install --no-deps meshtastic==2.3.12
 
-# Then install Python packages
+# Install only USB-required dependencies (fast!)
 pip install -r requirements.txt
 ```
 
-**Note:** The `meshtastic` library may take a few minutes to install on Pi Zero 2 W even with system dependencies.
+**Note:** This installation method skips Bluetooth dependencies (dbus-fast, bleak) which can take 30+ minutes to compile on Pi Zero 2 W. Since this project uses USB connection only, these are not needed.
 
 ## Configuration
 

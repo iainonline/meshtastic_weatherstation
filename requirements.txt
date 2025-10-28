@@ -1,4 +1,13 @@
-# Use version 2.1.0 to avoid slow dbus-fast compilation on Pi Zero 2 W
-# If you want 2.2.0+, run: sudo apt install python3-dbus python3-cryptography -y first
+# USB-only installation (no Bluetooth dependencies)
+# Install meshtastic without deps to skip slow dbus-fast compilation
+# Use: pip install --no-deps meshtastic==2.3.12
+# Then: pip install -r requirements.txt
+
 meshtastic==2.3.12
 pyserial>=3.5
+protobuf
+pypubsub
+dotmap
+pexpect
+tabulate
+timeago
