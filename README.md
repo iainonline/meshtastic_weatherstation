@@ -1,137 +1,103 @@
 # Meshtastic Weather Station
 
-A Python application for Raspberry Pi Zero 2 W that monitors and sends battery percentage, temperature, and humidity from a USB-connected Meshtastic node to a designated target node. Includes DHT22 temperature/humidity sensor support. Designed for headless operation - perfect for remote weather monitoring.
+A Python application for Raspberry Pi Zero 2 W that sends temperature and humidity data via Meshtastic. **No meshtastic Python library required** - uses direct serial communication for maximum simplicity and speed.
 
 ## Features
 
-- 🔋 Automatically sends battery percentage every 60 seconds
 - 🌡️ Reads temperature and humidity from DHT22 sensor
-- 📱 Connects to Meshtastic nodes via USB
+- � Sends data via Meshtastic using AT commands over serial
+- 🚀 **Ultra-fast install** - NO meshtastic library dependencies!
 - 🤖 Headless operation - no keyboard/mouse required
 - ⚙️ JSON-based configuration
-- 🔄 Configurable send intervals and target nodes
-- 🚀 Auto-starts on boot with systemd service
-- 📊 Sends data in both Celsius and Fahrenheit
+- 🔄 Configurable send intervals
+- 📊 Sends data in Fahrenheit
+
+## Why No Meshtastic Library?
+
+The official `meshtastic` Python library has heavy dependencies (protobuf, dbus-fast, etc.) that take 30+ minutes to compile on Pi Zero 2 W. This version uses **direct serial AT commands** instead - same functionality, **installs in seconds**!
 
 ## Requirements
 
-- Raspberry Pi Zero 2 W (or any Linux system with ARM/x86 architecture)
+- Raspberry Pi Zero 2 W (or any Linux system)
 - Python 3.7+
 - USB-connected Meshtastic node
 - DHT22 temperature/humidity sensor (optional)
-- Virtual environment (recommended)
-
-## Hardware Setup
-
-### Meshtastic Node
-✅ **Raspberry Pi Zero 2 W** - Fully tested and optimized
-✅ **ARM Architecture** - All libraries are ARM-compatible
-✅ **USB Serial** - Works with any Meshtastic node connected via USB
-
-### DHT22 Sensor Wiring (Default: GPIO4)
-- **VCC (Pin 1)** → 3.3V (Pi Pin 1)
-- **Data (Pin 2)** → GPIO4 (Pi Pin 7) - Configurable in config.json
-- **GND (Pin 4)** → GND (Pi Pin 6)
-- **Note:** A 10kΩ pull-up resistor between VCC and Data is recommended (some modules have this built-in)
 
 ## Installation
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/SimpleMeshPing.git
-cd SimpleMeshPing
+git clone https://github.com/iainonline/meshtastic_weatherstation.git
+cd meshtastic_weatherstation
 ```
 
 ### 2. Create Virtual Environment
 
 ```bash
 python3 -m venv venv
-```
-
-### 3. Activate Virtual Environment
-
-```bash
 source venv/bin/activate
 ```
 
-### 4. Install Dependencies
+### 3. Install Dependencies
 
-**IMPORTANT for Raspberry Pi Zero 2 W - Minimal USB-only installation:**
+**SUPER SIMPLE - Just 2 packages!**
 
 ```bash
-# Install system library for DHT22 sensor
+# Install system library for DHT22
 sudo apt install libgpiod2 -y
 
-# Upgrade pip first
-pip install --upgrade pip
-
-# STEP 1: Install meshtastic WITHOUT its dependencies
-# This prevents installation of dbus-fast (Bluetooth) which takes 30+ minutes
-pip install --no-deps meshtastic==2.3.12
-
-# STEP 2: Install ONLY essential dependencies (under 2 minutes!)
+# Install Python dependencies (under 30 seconds!)
 pip install -r requirements.txt
 ```
 
-**What gets installed:**
-- `pyserial` - USB serial communication
-- `protobuf` - Message encoding (required by meshtastic)
-- `pypubsub` - Event messaging (required by meshtastic)
-- `adafruit-circuitpython-dht` - DHT22 sensor library
-- `adafruit-blinka` - CircuitPython compatibility layer
+That's it! No meshtastic library, no protobuf, no dbus-fast compilation!
 
-**What does NOT get installed (USB-only setup):**
-- ❌ `dbus-fast` - Bluetooth only (30+ min compile time on Pi Zero 2 W)
-- ❌ `bleak` - Bluetooth Low Energy scanner
-- ❌ `dotmap`, `pexpect`, `tabulate`, `timeago` - Optional meshtastic features not needed
+## Hardware Setup
+
+### DHT22 Sensor Wiring (Default: GPIO4)
+- **VCC (Pin 1)** → 3.3V (Pi Pin 1)
+- **Data (Pin 2)** → GPIO4 (Pi Pin 7) - Configurable in config.json
+- **GND (Pin 4)** → GND (Pi Pin 6)
+- **10kΩ pull-up resistor** between VCC and Data (recommended)
 
 ## Configuration
 
-Edit `config.json` to set your target node and preferences:
+Edit `config.json`:
 
 ```json
 {
-  "target_node_num": 2658499212,
+  "target_node_id": "!ffffffff",
   "send_interval_seconds": 60,
-  "auto_start_timeout_seconds": 10,
   "dht22_enabled": true,
   "dht22_gpio_pin": 4
 }
 ```
 
-**Configuration Parameters:**
-- `target_node_num`: The Meshtastic node number to send messages to (decimal format)
-- `send_interval_seconds`: How often to send weather updates (default: 60)
-- `auto_start_timeout_seconds`: Not used in headless mode (kept for compatibility)
-- `dht22_enabled`: Enable/disable DHT22 sensor (true/false)
-- `dht22_gpio_pin`: GPIO pin number for DHT22 data line (default: 4 = Physical Pin 7)
-
-**Finding Your Target Node Number:**
-You can find node numbers using the Meshtastic app or by checking your node's web interface.
+**Parameters:**
+- `target_node_id`: Meshtastic node ID (use `!ffffffff` for broadcast, or specific node like `!a1b2c3d4`)
+- `send_interval_seconds`: How often to send updates (default: 60)
+- `dht22_enabled`: Enable/disable DHT22 sensor
+- `dht22_gpio_pin`: GPIO pin for DHT22 data line (default: 4)
 
 ## Usage
 
 ### Manual Run
 
 ```bash
-# Activate virtual environment
 source venv/bin/activate
-
-# Run the application
-python3 battery_monitor.py
+python3 weather_station.py
 ```
 
 The script will:
 1. Initialize DHT22 sensor (if enabled)
-2. Display configuration
-3. Connect to USB Meshtastic node
-4. Start sending battery, temperature, and humidity data every 60 seconds
-5. Run continuously until stopped with Ctrl+C
+2. Find and connect to Meshtastic device via USB
+3. Send weather data every 60 seconds
+4. Run continuously until stopped with Ctrl+C
 
-**Example output message:**
+**Example output:**
 ```
-Bat: 95% | Temp: 22.5°C (72.5°F) | Hum: 45.2%
+Temp: 72.5°F | Hum: 45.2%
 ```
 
 ### Running on Boot (Headless Setup)
@@ -144,18 +110,18 @@ For headless Raspberry Pi operation, set up a systemd service:
 sudo nano /etc/systemd/system/mesh-battery.service
 ```
 
-#### 2. Add this content (update paths as needed):
+#### 2. Add this content:
 
 ```ini
 [Unit]
-Description=Meshtastic Battery Monitor
+Description=Meshtastic Weather Station
 After=network.target
 
 [Service]
 Type=simple
 User=pi
-WorkingDirectory=/home/iain/SimpleMeshPing
-ExecStart=/home/iain/SimpleMeshPing/venv/bin/python3 /home/iain/SimpleMeshPing/battery_monitor.py
+WorkingDirectory=/home/pi/meshtastic_weatherstation
+ExecStart=/home/pi/meshtastic_weatherstation/venv/bin/python3 /home/pi/meshtastic_weatherstation/weather_station.py
 Restart=always
 RestartSec=10
 
@@ -235,25 +201,22 @@ pip install -r requirements.txt
 
 ## Dependencies
 
-**Minimal USB-only installation:**
-- **meshtastic** (2.3.12) - Meshtastic communication library
+**Minimal - Just 2 packages!**
 - **pyserial** (>=3.5) - USB serial communication
-- **protobuf** (>=3.20.0) - Protocol buffer encoding
-- **pypubsub** (>=4.0.3) - Event messaging system
-- **adafruit-circuitpython-dht** - DHT22 sensor driver
-- **adafruit-blinka** - CircuitPython compatibility for Raspberry Pi
+- **adafruit-circuitpython-dht** - DHT22 sensor (optional)
+- **adafruit-blinka** - GPIO support for CircuitPython
 
-**Total install time on Pi Zero 2 W:** ~2 minutes (vs 30+ minutes with Bluetooth dependencies)
+**NO meshtastic library required!** Uses direct AT command communication over serial.
 
-All libraries are ARM-compatible and optimized for Raspberry Pi Zero 2 W.
+**Total install time on Pi Zero 2 W:** ~30 seconds (vs 30+ minutes with meshtastic library)
 
 ## Project Structure
 
 ```
-SimpleMeshPing/
-├── battery_monitor.py      # Main weather station application
+meshtastic_weatherstation/
+├── weather_station.py      # Main application (NO meshtastic library!)
 ├── config.json             # Configuration file
-├── requirements.txt        # Python dependencies
+├── requirements.txt        # Minimal dependencies (just pyserial + DHT22)
 └── README.md              # This file
 ```
 

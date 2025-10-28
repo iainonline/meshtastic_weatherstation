@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
 """
 Meshtastic Weather Station
-Sends battery percentage, temperature, and humidity from USB-connected node to a target node.
-Reads DHT22 sensor for temperature and humidity data.
+Sends battery percentage, temperature, and humidity via Meshtastic serial interface.
+Uses direct serial communication - no meshtastic library required.
 """
 
 import json
 import time
 import sys
-import meshtastic
-import meshtastic.serial_interface
-from threading import Event, Thread
+import serial
+import serial.tools.list_ports
 from datetime import datetime
 import adafruit_dht
 import board

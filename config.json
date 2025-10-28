@@ -1,5 +1,5 @@
 {
-  "target_node_num": 2658499212,
+  "target_node_id": "!ffffffff",
   "send_interval_seconds": 60,
   "auto_start_timeout_seconds": 10,
   "dht22_enabled": true,

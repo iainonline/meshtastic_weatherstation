@@ -1,9 +1,9 @@
-# Meshtastic core dependencies (USB-only, no Bluetooth)
-pyserial>=3.5
-protobuf>=3.20.0
-pypubsub>=4.0.3
-packaging>=20.0
+# Minimal dependencies - NO meshtastic library needed!
+# Direct serial communication only
 
-# DHT22 Temperature/Humidity Sensor
+# Serial communication
+pyserial>=3.5
+
+# DHT22 Temperature/Humidity Sensor (optional)
 adafruit-circuitpython-dht
 adafruit-blinka
