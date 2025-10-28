@@ -111,9 +111,9 @@ class MeshBatteryMonitor:
             message_parts.append("Bat: N/A")
         
         if temperature is not None and humidity is not None:
-            # Convert to Fahrenheit for US users (optional)
+            # Convert to Fahrenheit
             temperature_f = temperature * 9/5 + 32
-            message_parts.append(f"Temp: {temperature:.1f}°C ({temperature_f:.1f}°F)")
+            message_parts.append(f"Temp: {temperature_f:.1f}°F")
             message_parts.append(f"Hum: {humidity:.1f}%")
         else:
             if self.dht22_enabled:
