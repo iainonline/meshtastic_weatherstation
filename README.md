@@ -57,20 +57,34 @@ source venv/bin/activate
 
 ### 4. Install Dependencies
 
-**IMPORTANT for Raspberry Pi Zero 2 W - Follow this exact order:**
+**IMPORTANT for Raspberry Pi Zero 2 W - Minimal USB-only installation:**
 
 ```bash
 # Install system library for DHT22 sensor
 sudo apt install libgpiod2 -y
 
-# STEP 1: Install meshtastic WITHOUT dependencies (skips 30min dbus-fast compilation!)
+# Upgrade pip first
+pip install --upgrade pip
+
+# STEP 1: Install meshtastic WITHOUT its dependencies
+# This prevents installation of dbus-fast (Bluetooth) which takes 30+ minutes
 pip install --no-deps meshtastic==2.3.12
 
-# STEP 2: Install ONLY the required dependencies (fast - under 2 minutes!)
+# STEP 2: Install ONLY essential dependencies (under 2 minutes!)
 pip install -r requirements.txt
 ```
 
-**Critical:** Do NOT skip `--no-deps` flag! Installing meshtastic normally will pull in dbus-fast which takes 30+ minutes to compile on Pi Zero 2 W. Since this is USB-only, dbus-fast is not needed.
+**What gets installed:**
+- `pyserial` - USB serial communication
+- `protobuf` - Message encoding (required by meshtastic)
+- `pypubsub` - Event messaging (required by meshtastic)
+- `adafruit-circuitpython-dht` - DHT22 sensor library
+- `adafruit-blinka` - CircuitPython compatibility layer
+
+**What does NOT get installed (USB-only setup):**
+- ❌ `dbus-fast` - Bluetooth only (30+ min compile time on Pi Zero 2 W)
+- ❌ `bleak` - Bluetooth Low Energy scanner
+- ❌ `dotmap`, `pexpect`, `tabulate`, `timeago` - Optional meshtastic features not needed
 
 ## Configuration
 
@@ -210,14 +224,28 @@ Some nodes may not report battery status immediately. The app will send "Battery
 - Verify Python path in service file matches your installation
 - Ensure virtual environment has all dependencies installed
 
+### "ModuleNotFoundError" Errors
+If you get import errors, verify you followed the exact installation order:
+```bash
+# Must install meshtastic FIRST with --no-deps
+pip install --no-deps meshtastic==2.3.12
+# THEN install requirements
+pip install -r requirements.txt
+```
+
 ## Dependencies
 
-- **meshtastic** (2.3.12) - Python library for Meshtastic communication
-- **pyserial** (>=3.5) - Serial port communication library
-- **adafruit-circuitpython-dht** - DHT22 temperature/humidity sensor library
-- **RPi.GPIO** - Raspberry Pi GPIO control
+**Minimal USB-only installation:**
+- **meshtastic** (2.3.12) - Meshtastic communication library
+- **pyserial** (>=3.5) - USB serial communication
+- **protobuf** (>=3.20.0) - Protocol buffer encoding
+- **pypubsub** (>=4.0.3) - Event messaging system
+- **adafruit-circuitpython-dht** - DHT22 sensor driver
+- **adafruit-blinka** - CircuitPython compatibility for Raspberry Pi
 
-All libraries are fully compatible with Raspberry Pi Zero 2 W ARM architecture.
+**Total install time on Pi Zero 2 W:** ~2 minutes (vs 30+ minutes with Bluetooth dependencies)
+
+All libraries are ARM-compatible and optimized for Raspberry Pi Zero 2 W.
 
 ## Project Structure
 
